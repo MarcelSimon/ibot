@@ -1,3 +1,29 @@
+**Note:** This repository is a fork of [ibot](https://github.com/bytedance/ibot), with additional improvements to simplify setup:
+
+- Added a **Dockerfile** for easier dependency management and reproducibility.
+- Included a **sample script** to run the Docker container conveniently.
+- Fixed https://github.com/bytedance/ibot/issues/30 by setting `model.backbone.use_checkpoint=False` as default in `run.sh`
+
+### How to build and run the Docker container:
+
+1. **Build the Docker image**:
+
+```bash
+git clone https://github.com/MarcelSimon/ibot.git
+cd ibot
+docker build -t ibot_docker .
+```
+
+2. **Run the Docker container**:
+
+The script `run_ade20k_linear_eval.sh` shows how to use the container. Edit the paths in `run_ade20k_linear_eval.sh` and run it to start an evaluation on ADE20k semantic segmentation using UperNet:
+
+```bash
+bash run_ade20k_linear_eval.sh
+```
+
+Full documentation is below for reference.
+
 # Image BERT Pre-Training with iBOT <img width="32" alt="iBOT Icon" src=".github/ibot.png">
 
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/ibot-image-bert-pre-training-with-online/unsupervised-image-classification-on-imagenet)](https://paperswithcode.com/sota/unsupervised-image-classification-on-imagenet?p=ibot-image-bert-pre-training-with-online) \
