@@ -6,7 +6,7 @@ IBOT_DIR=/path/to/ibot
 #!/bin/bash
 
 # Define clear variables for maintainability
-IMAGE_NAME="ibot"
+IMAGE_NAME="ibot_docker"
 CONTAINER_NAME="$IMAGE_NAME"
 BASE_DIR=/path/to/pre-trained/model
 CHECKPOINT=$BASE_DIR/checkpoint.pth
