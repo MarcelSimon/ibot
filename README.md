@@ -4,6 +4,11 @@
 - Included a **sample script** to run the Docker container conveniently.
 - Fixed https://github.com/bytedance/ibot/issues/30 by setting `model.backbone.use_checkpoint=False` as default in `run.sh`
 
+In addition, please not that in the ibot repo the learning rate and training steps are not adjusted
+to the batch size. So ideally you want to make sure that `$NUM_GPUS * data.samples_per_gpu` is the 
+same as in the paper. The defaults can be find in the [evaluation README.md](https://github.com/MarcelSimon/ibot/blob/main/evaluation/README.md) or inside the code under
+https://github.com/MarcelSimon/ibot/tree/main/evaluation.
+
 ### How to build and run the Docker container:
 
 1. **Build the Docker image**:
