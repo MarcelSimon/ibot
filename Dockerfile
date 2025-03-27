@@ -16,15 +16,22 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1-mesa-glx \
     && rm -rf /var/lib/apt/lists/*
 
+# We freeze all existing package to avoid that pytorch apex etc get overriden
+# by newer versions, which don't work anymore with ibot
+RUN pip freeze > constraints.txt
+
 # Install MMCV separately (CUDA 11.0, iBot uses Torch 1.7.1
 RUN pip install \
     --no-cache-dir \
     --upgrade-strategy only-if-needed \
+    -c constraints.txt \
     -f https://download.openmmlab.com/mmcv/dist/cu110/torch1.8.0/index.html \
-    mmcv-full==1.3.9
+    mmcv-full==1.3.9 \
+    && cd ..
 
 # Additional Python dependencies
 RUN pip3 install --no-cache-dir --upgrade-strategy only-if-needed \
+    -c constraints.txt \
     pytest-runner \
     scipy \
     tensorboardX \
@@ -45,13 +52,21 @@ RUN pip3 install --no-cache-dir --upgrade-strategy only-if-needed \
 # Install MMDetection (Swin Transformer Object Detection)
 RUN git clone https://github.com/SwinTransformer/Swin-Transformer-Object-Detection.git \
     && cd Swin-Transformer-Object-Detection \
-    && pip3 install --upgrade-strategy only-if-needed --no-cache-dir -r requirements/build.txt \
-    && pip3 install --upgrade-strategy only-if-needed -v -e .
+    && pip3 install --upgrade-strategy only-if-needed \
+        -c ../constraints.txt \
+        --no-cache-dir -r requirements/build.txt \
+    && pip3 install --upgrade-strategy only-if-needed \
+        -c ../constraints.txt \
+        -v -e . \
+    && cd ..
 
 # Install MMSegmentation v0.12.0
 RUN git clone -b v0.12.0 https://github.com/open-mmlab/mmsegmentation.git \
     && cd mmsegmentation \
-    && pip3 install --upgrade-strategy only-if-needed -v -e .
+    && pip3 install \
+    -c ../constraints.txt \
+    --upgrade-strategy only-if-needed -v -e . \
+    && cd ..
 
 # Cleanup pip cache
 RUN rm -rf ~/.cache/pip
