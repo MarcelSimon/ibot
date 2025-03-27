@@ -16,17 +16,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1-mesa-glx \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install \
-    --index-url https://download.pytorch.org/whl/cu110 \
-    torch==1.7.1 \
-    torchvision \
-    torchaudio
-
 # Install MMCV separately (CUDA 11.0, iBot uses Torch 1.7.1
 RUN pip install \
     --no-cache-dir \
     --upgrade-strategy only-if-needed \
-    -f https://download.openmmlab.com/mmcv/dist/cu110/torch1.7.1/index.html \
+    -f https://download.openmmlab.com/mmcv/dist/cu110/torch1.8.0/index.html \
     mmcv-full==1.3.9
 
 # Additional Python dependencies
@@ -47,13 +41,6 @@ RUN pip3 install --no-cache-dir --upgrade-strategy only-if-needed \
     mkl \
     cyanure \
     yapf==0.30
-
-RUN pip uninstall apex -y \
-    && pip3 install git+https://github.com/NVIDIA/apex@02a33875970e1b555754dfc4ab85d05595d23764 \
-    --no-cache-dir \
-    --global-option="--cpp_ext" \
-    --global-option="--cuda_ext" \
-    --no-build-isolation
 
 # Install MMDetection (Swin Transformer Object Detection)
 RUN git clone https://github.com/SwinTransformer/Swin-Transformer-Object-Detection.git \
