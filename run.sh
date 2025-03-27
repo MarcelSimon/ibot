@@ -353,7 +353,7 @@ if [[ $TYPE =~ imagenet_knn ]] || [[ $TYPE =~ imagenet_reg ]] || \
                 --launcher pytorch \
                 --work-dir $SUB_OUTPUT_DIR \
                 --deterministic \
-                --options model.backbone.use_checkpoint=True \
+                --options model.backbone.use_checkpoint=False \
                 model.pretrained=$WEIGHT_FILE \
                 ${@:6}
             python3 -m torch.distributed.launch --nproc_per_node=$GPUS_PER_NODE \
@@ -363,7 +363,7 @@ if [[ $TYPE =~ imagenet_knn ]] || [[ $TYPE =~ imagenet_reg ]] || \
                 $SUB_OUTPUT_DIR/iter_160000.pth \
                 --launcher pytorch \
                 --eval mIoU \
-                --options model.backbone.use_checkpoint=True \
+                --options model.backbone.use_checkpoint=False \
                 ${@:6}
         done
     fi
@@ -383,17 +383,18 @@ if [[ $TYPE =~ imagenet_knn ]] || [[ $TYPE =~ imagenet_reg ]] || \
                 --launcher pytorch \
                 --work-dir $SUB_OUTPUT_DIR \
                 --deterministic \
-                --options model.backbone.use_checkpoint=True \
-                model.pretrained=$WEIGHT_FILE \
+                --options \
+                    model.backbone.use_checkpoint=False \
+                    model.pretrained=$WEIGHT_FILE \
                 ${@:6}
             python3 -m torch.distributed.launch --nproc_per_node=$GPUS_PER_NODE \
                 --master_port=$[${MASTER_PORT:-29500}-$K] \
                 $CURDIR/evaluation/semantic_segmentation/test.py \
                 $CURDIR/evaluation/semantic_segmentation/configs/upernet/${ARCH}_512_ade20k_160k.py \
-                $SUB_OUTPUT_DIR/iter_160000.pth \
+                $SUB_OUTPUT_DIR/iter_100.pth \
                 --launcher pytorch \
                 --eval mIoU \
-                --options model.backbone.use_checkpoint=True \
+                --options model.backbone.use_checkpoint=False \
                 ${@:6}
         done
     fi
@@ -413,7 +414,7 @@ if [[ $TYPE =~ imagenet_knn ]] || [[ $TYPE =~ imagenet_reg ]] || \
                 --launcher pytorch \
                 --work-dir $SUB_OUTPUT_DIR \
                 --deterministic \
-                --cfg-options model.backbone.use_checkpoint=True \
+                --cfg-options model.backbone.use_checkpoint=False \
                 model.pretrained=$WEIGHT_FILE \
                 ${@:6}
             python3 -m torch.distributed.launch --nproc_per_node=$GPUS_PER_NODE \
@@ -423,7 +424,7 @@ if [[ $TYPE =~ imagenet_knn ]] || [[ $TYPE =~ imagenet_reg ]] || \
                 $SUB_OUTPUT_DIR/latest.pth \
                 --launcher pytorch \
                 --eval bbox segm \
-                --cfg-options model.backbone.use_checkpoint=True \
+                --cfg-options model.backbone.use_checkpoint=False \
                 ${@:6}
         done
     fi
