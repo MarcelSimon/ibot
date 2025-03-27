@@ -12,6 +12,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 RUN apt-get update && apt-get install -y --no-install-recommends \
     tmux \
     sudo \
+    gosu \
     git \
     libgl1-mesa-glx \
     && rm -rf /var/lib/apt/lists/*
@@ -77,7 +78,11 @@ RUN groupadd --gid ${USER_GID} ${USERNAME} \
     && usermod -aG sudo ${USERNAME} \
     && echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
     && chown -R ${USERNAME}:${USERNAME} /home/${USERNAME} \
-    && chmod -R 777 /home/${USERNAME}
+    && chmod -R 700 /home/${USERNAME}
 
-USER ${USERNAME}
-WORKDIR /home/${USERNAME}
+# Add custom entrypoint
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+
+WORKDIR /workspace
