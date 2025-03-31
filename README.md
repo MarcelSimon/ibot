@@ -21,10 +21,10 @@ docker build -t ibot_docker .
 
 2. **Run the Docker container**:
 
-The script `run_ade20k_linear_eval.sh` shows how to use the container. Edit the paths in `run_ade20k_linear_eval.sh` and run it to start an evaluation on ADE20k semantic segmentation using UperNet:
+The script `run_ade20k_upernet_eval.sh` shows how to use the container. Edit the paths in `run_ade20k_upernet_eval.sh` and run it to start an evaluation on ADE20k semantic segmentation using UperNet:
 
 ```bash
-bash run_ade20k_linear_eval.sh
+bash run_ade20k_upernet_eval.sh
 ```
 
 Full documentation is below for reference.
