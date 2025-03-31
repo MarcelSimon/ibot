@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+set -e
+
 CURDIR=$(cd $(dirname $0); pwd)
 cd $CURDIR
 export PYTHONPATH="$PYTHONPATH:$CURDIR"
@@ -391,7 +394,7 @@ if [[ $TYPE =~ imagenet_knn ]] || [[ $TYPE =~ imagenet_reg ]] || \
                 --master_port=$[${MASTER_PORT:-29500}-$K] \
                 $CURDIR/evaluation/semantic_segmentation/test.py \
                 $CURDIR/evaluation/semantic_segmentation/configs/upernet/${ARCH}_512_ade20k_160k.py \
-                $SUB_OUTPUT_DIR/iter_100.pth \
+                $SUB_OUTPUT_DIR/iter_160000.pth \
                 --launcher pytorch \
                 --eval mIoU \
                 --options model.backbone.use_checkpoint=False \
