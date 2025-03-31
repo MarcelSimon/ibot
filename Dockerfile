@@ -17,6 +17,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1-mesa-glx \
     && rm -rf /var/lib/apt/lists/*
 
+# Install PyTorcy 1.7.1 and remove all compiled torch packages
+RUN pip uninstall -y torch torchvision torchtext \
+    && rm -rf /opt/pytorch/ \
+    && pip3 install \
+        --no-cache-dir --upgrade-strategy only-if-needed \
+        torch==1.7.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu110
+
 # We freeze all existing package to avoid that pytorch apex etc get overriden
 # by newer versions, which don't work anymore with ibot
 RUN pip freeze > constraints.txt
@@ -26,7 +33,7 @@ RUN pip install \
     --no-cache-dir \
     --upgrade-strategy only-if-needed \
     -c constraints.txt \
-    -f https://download.openmmlab.com/mmcv/dist/cu110/torch1.8.0/index.html \
+    -f https://download.openmmlab.com/mmcv/dist/cu110/torch1.7.1/index.html \
     mmcv-full==1.3.9 \
     && cd ..
 
