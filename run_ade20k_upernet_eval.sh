@@ -47,4 +47,4 @@ cp "$(realpath "$0")" "${OUTPUT_DIR}/seg/" \
             data.val.data_root=/data/$DATA_ROOT \
             data.test.data_root=/data/$DATA_ROOT \
             2>&1 | tee -a \"/data/${OUTPUT_DIR}/seg/semseg.log\" \
-        "
+    "
