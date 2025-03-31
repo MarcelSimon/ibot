@@ -43,5 +43,7 @@ docker run \
             data.workers_per_gpu=4 \
             model.backbone.out_with_norm=true \
             optimizer.lr=3e-5 \
-            data_root=/data/$DATA_ROOT \
+            data.train.data_root=/data/$DATA_ROOT \
+            data.val.data_root=/data/$DATA_ROOT \
+            data.test.data_root=/data/$DATA_ROOT \
         "
