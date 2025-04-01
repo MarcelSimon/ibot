@@ -2,6 +2,7 @@
 set -e 
 
 # Configuration
+# Use absolute paths or VARIABLE="$(realpath 'my/relative/path')"
 IBOT_DIR=/path/to/ibot
 IMAGE_NAME="marcel.simon_ibot"
 CONTAINER_NAME="$IMAGE_NAME"
