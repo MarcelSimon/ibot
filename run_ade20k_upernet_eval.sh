@@ -16,8 +16,12 @@ VISIBLE_GPUS=0,1,2,3
 NUM_GPUS=$(echo "${VISIBLE_GPUS}" | awk -F',' '{print NF}')
 
 mkdir -p "/${OUTPUT_DIR}/seg"
-cp "$(realpath "$0")" "${OUTPUT_DIR}/seg/" \
-&& docker run \
+cp "$(realpath "$0")" "${OUTPUT_DIR}/seg/"
+# Note: we disable evaluation during training as it causes a data type
+# mismatch and training exits. The evaluation is instead done once after
+# training which works as it uses a different script. Refer to
+# https://github.com/bytedance/ibot/issues/6#issuecomment-1129677763
+docker run \
     -it \
     --rm \
     --init \
@@ -47,5 +51,8 @@ cp "$(realpath "$0")" "${OUTPUT_DIR}/seg/" \
             data.train.data_root=/data/$DATA_ROOT \
             data.val.data_root=/data/$DATA_ROOT \
             data.test.data_root=/data/$DATA_ROOT \
+            checkpoint_config.interval=10000 \
+            checkpoint_config.max_keep_ckpts=1 \
+            evaluation.interval=999999 \
             2>&1 | tee -a \"/data/${OUTPUT_DIR}/seg/semseg.log\" \
     "
