@@ -345,10 +345,8 @@ if [[ $TYPE =~ imagenet_knn ]] || [[ $TYPE =~ imagenet_reg ]] || \
         for K in $(seq ${NODE_ID:-0} ${TOTAL_NODES:-1} $[${#KEY_LIST[@]}-1]) 
         do
             echo "Starting evaluating ${KEY_LIST[$K]}."
-            if [ -z $WEIGHT_FILE ]; then
-                WEIGHT_FILE=$OUTPUT_DIR/checkpoint_${KEY_LIST[$K]}.pth
-                python3 extract_backbone_weights.py $PRETRAINED $WEIGHT_FILE --checkpoint_key ${KEY_LIST[$K]}
-            fi
+            WEIGHT_FILE=$OUTPUT_DIR/checkpoint_${KEY_LIST[$K]}.pth
+            python3 extract_backbone_weights.py $PRETRAINED $WEIGHT_FILE --checkpoint_key ${KEY_LIST[$K]}
             python3 -m torch.distributed.launch --nproc_per_node=$GPUS_PER_NODE \
                 --master_port=$[${MASTER_PORT:-29500}-$K] \
                 $CURDIR/evaluation/semantic_segmentation/train.py \
@@ -363,7 +361,7 @@ if [[ $TYPE =~ imagenet_knn ]] || [[ $TYPE =~ imagenet_reg ]] || \
                 --master_port=$[${MASTER_PORT:-29500}-$K] \
                 $CURDIR/evaluation/semantic_segmentation/test.py \
                 $CURDIR/evaluation/semantic_segmentation/configs/linear/${ARCH}_512_ade20k_160k.py \
-                $SUB_OUTPUT_DIR/iter_160000.pth \
+                $(ls -v $SUB_OUTPUT_DIR/*.pth | tail -n 1) \
                 --launcher pytorch \
                 --eval mIoU \
                 --options model.backbone.use_checkpoint=False \
@@ -375,10 +373,8 @@ if [[ $TYPE =~ imagenet_knn ]] || [[ $TYPE =~ imagenet_reg ]] || \
         for K in $(seq ${NODE_ID:-0} ${TOTAL_NODES:-1} $[${#KEY_LIST[@]}-1]) 
         do
             echo "Starting evaluating ${KEY_LIST[$K]}."
-            if [ -z $WEIGHT_FILE ]; then
-                WEIGHT_FILE=$OUTPUT_DIR/checkpoint_${KEY_LIST[$K]}.pth
-                python3 extract_backbone_weights.py $PRETRAINED $WEIGHT_FILE --checkpoint_key ${KEY_LIST[$K]}
-            fi
+            WEIGHT_FILE=$OUTPUT_DIR/checkpoint_${KEY_LIST[$K]}.pth
+            python3 extract_backbone_weights.py $PRETRAINED $WEIGHT_FILE --checkpoint_key ${KEY_LIST[$K]}
             python3 -m torch.distributed.launch --nproc_per_node=$GPUS_PER_NODE \
                 --master_port=$[${MASTER_PORT:-29500}-$K] \
                 $CURDIR/evaluation/semantic_segmentation/train.py \
@@ -394,7 +390,7 @@ if [[ $TYPE =~ imagenet_knn ]] || [[ $TYPE =~ imagenet_reg ]] || \
                 --master_port=$[${MASTER_PORT:-29500}-$K] \
                 $CURDIR/evaluation/semantic_segmentation/test.py \
                 $CURDIR/evaluation/semantic_segmentation/configs/upernet/${ARCH}_512_ade20k_160k.py \
-                $SUB_OUTPUT_DIR/iter_160000.pth \
+                $(ls -v $SUB_OUTPUT_DIR/*.pth | tail -n 1) \
                 --launcher pytorch \
                 --eval mIoU \
                 --options model.backbone.use_checkpoint=False \
