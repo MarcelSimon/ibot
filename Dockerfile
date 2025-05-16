@@ -28,15 +28,7 @@ RUN pip uninstall -y torch torchvision torchtext \
 # by newer versions, which don't work anymore with ibot
 RUN pip freeze > constraints.txt
 
-# Install MMCV separately (CUDA 11.0, iBot uses Torch 1.7.1
-#RUN pip install \
-#    --no-cache-dir \
-#    --upgrade-strategy only-if-needed \
-#    -c constraints.txt \
-#    -f https://download.openmmlab.com/mmcv/dist/cu110/torch1.7.1/index.html \
-#    mmcv-full==1.3.9 \
-#    && cd ..
-
+# Install MMCV separately (CUDA 11.0, Torch 1.7.1
 RUN git clone https://github.com/open-mmlab/mmcv.git --branch v1.3.9 --single-branch \
     && cd mmcv \
     && git submodule update --init --recursive \
