@@ -27,14 +27,25 @@ def main():
     output_dict = dict(state_dict=dict())
     has_backbone = False
     for key, value in ck[args.checkpoint_key].items():
-        if key.startswith('backbone'):
+        if key.startswith('teacher.backbone.'):
+            output_dict['state_dict'][key[len('teacher.backbone.'):]] = value
+            #print(f"Extracting {key} as {key[16:]} from checkpoint")
+            has_backbone = True
+        elif key.startswith('backbone.module'):
+            output_dict['state_dict'][key[16:]] = value
+            #print(f"Extracting {key} as {key[16:]} from checkpoint")
+            has_backbone = True
+        elif key.startswith('backbone'):
             output_dict['state_dict'][key[9:]] = value
+            #print(f"Extracting {key} as {key[9:]} from checkpoint")
             has_backbone = True
         elif key.startswith('module.backbone'):
             output_dict['state_dict'][key[16:]] = value
+            #print(f"Extracting {key} as {key[16:]} from checkpoint")
             has_backbone = True
         elif args.with_head:
             output_dict['state_dict'][key] = value
+            #print(f"Extracting {key} from checkpoint")
     if not has_backbone:
         # raise Exception("Cannot find a backbone module in the checkpoint.")
         print("Cannot find a backbone module in the checkpoint. No modification.")
