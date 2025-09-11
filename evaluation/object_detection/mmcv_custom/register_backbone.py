@@ -191,3 +191,19 @@ class VisionTransformer(VisionTransformer):
                 features[i] = ops[i](features[i])
 
         return tuple(features)
+    
+    
+import torch.nn as nn
+from mmcv.cnn import NORM_LAYERS    # registry name in MMCV 1.x
+
+class LayerNorm2d(nn.LayerNorm):
+    """LayerNorm over channel axis of NCHW tensors."""
+    def __init__(self, num_channels, eps=1e-6, affine=True):
+        super().__init__(num_channels, eps=eps, elementwise_affine=affine)
+
+    def forward(self, x):
+        # N,C,H,W -> N,H,W,C  → LN  → back
+        return super().forward(x.permute(0,2,3,1)).permute(0,3,1,2)
+
+# register so norm_cfg can find it
+NORM_LAYERS.register_module('LNCompat', module=LayerNorm2d)

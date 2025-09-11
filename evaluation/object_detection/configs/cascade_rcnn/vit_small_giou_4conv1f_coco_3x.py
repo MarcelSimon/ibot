@@ -17,7 +17,7 @@ _base_ = [
     '../_base_/schedules/schedule_1x.py', '../_base_/default_runtime.py'
 ]
 
-crop_size = (800, 1008) # the average aspect ratio of CoCo is ~1.25
+crop_size = (512, 512) # the average aspect ratio of CoCo is ~1.25
 
 model = dict(
     backbone=dict(
@@ -106,35 +106,79 @@ train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', with_bbox=True, with_mask=True),
     dict(type='RandomFlip', flip_ratio=0.5),
-    dict(type='AutoAugment',
-         policies=[
-             [
-                 dict(type='Resize',
-                      img_scale=[(480, 1333), (512, 1333), (544, 1333), (576, 1333),
-                                 (608, 1333), (640, 1333), (672, 1333), (704, 1333),
-                                 (736, 1333), (768, 1333), (800, 1333)],
-                      multiscale_mode='value',
-                      keep_ratio=True)
-             ],
-             [
-                 dict(type='Resize',
-                      img_scale=[(400, 1333), (500, 1333), (600, 1333)],
-                      multiscale_mode='value',
-                      keep_ratio=True),
-                 dict(type='RandomCrop',
-                      crop_type='absolute_range',
-                      crop_size=(384, 600),
-                      allow_negative_crop=True),
-                 dict(type='Resize',
-                      img_scale=[(480, 1333), (512, 1333), (544, 1333),
-                                 (576, 1333), (608, 1333), (640, 1333),
-                                 (672, 1333), (704, 1333), (736, 1333),
-                                 (768, 1333), (800, 1333)],
-                      multiscale_mode='value',
-                      override=True,
-                      keep_ratio=True)
-             ]
-         ]),
+    # dict(type='AutoAugment',
+    #      policies=[
+    #          [
+    #              dict(type='Resize',
+    #                   img_scale=[(480, 1333), (512, 1333), (544, 1333), (576, 1333),
+    #                              (608, 1333), (640, 1333), (672, 1333), (704, 1333),
+    #                              (736, 1333), (768, 1333), (800, 1333)],
+    #                   multiscale_mode='value',
+    #                   keep_ratio=True)
+    #          ],
+    #          [
+    #              dict(type='Resize',
+    #                   img_scale=[(400, 1333), (500, 1333), (600, 1333)],
+    #                   multiscale_mode='value',
+    #                   keep_ratio=True),
+    #              dict(type='RandomCrop',
+    #                   crop_type='absolute_range',
+    #                   crop_size=(384, 600),
+    #                   allow_negative_crop=True),
+    #              dict(type='Resize',
+    #                   img_scale=[(480, 1333), (512, 1333), (544, 1333),
+    #                              (576, 1333), (608, 1333), (640, 1333),
+    #                              (672, 1333), (704, 1333), (736, 1333),
+    #                              (768, 1333), (800, 1333)],
+    #                   multiscale_mode='value',
+    #                   override=True,
+    #                   keep_ratio=True)
+    #          ]
+    #      ]),
+    # dict(type='AutoAugment',
+    #      policies=[
+    #          [
+    #              dict(type='Resize',
+    #                   img_scale=[(288, 800), (307, 800), (326, 800),
+    #                              (345, 800), (364, 800), (384, 800),
+    #                              (403, 800), (422, 800), (441, 800),
+    #                              (460, 800), (480, 800)],
+    #                   multiscale_mode='value',
+    #                   keep_ratio=True)
+    #          ],
+    #          [
+    #              dict(type='Resize',
+    #                   img_scale=[(240, 800), (300, 800), (360, 800)],
+    #                   multiscale_mode='value',
+    #                   keep_ratio=True),
+    #              dict(type='RandomCrop',
+    #                   crop_type='absolute_range',
+    #                   crop_size=(230, 360),
+    #                   allow_negative_crop=True),
+    #              dict(type='Resize',
+    #                   img_scale=[(288, 800), (307, 800), (326, 800),
+    #                              (345, 800), (364, 800), (384, 800),
+    #                              (403, 800), (422, 800), (441, 800),
+    #                              (460, 800), (480, 800)],
+    #                   multiscale_mode='value',
+    #                   override=True,
+    #                   keep_ratio=True)
+    #          ]
+    #      ]),
+    dict(type='Resize',
+        img_scale=[(512, 1024), (640, 1024)],
+        multiscale_mode='value',
+        keep_ratio=True),
+
+    # --- stage B: crop a chip that is guaranteed to cover at least one GT ---
+    dict(type='RandomCrop',
+        crop_type='absolute',
+        crop_size=(512, 512),
+        allow_negative_crop=False),   # ignore background-only crops
+
+    # --- stage C: Ensure fixed size. We scale to 640 here to make training = testing scale
+    dict(type='Resize', img_scale=(512,512), keep_ratio=False, override=True),
+
     dict(type='Normalize', **img_norm_cfg),
     dict(type='Pad', size_divisor=32),
     dict(type='DefaultFormatBundle'),
