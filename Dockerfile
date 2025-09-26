@@ -43,12 +43,13 @@ RUN pip3 install --no-cache-dir --upgrade-strategy only-if-needed \
     pytest-runner \
     scipy \
     tensorboardX \
+    protobuf==3.20 \
     faiss-gpu==1.6.1 \
     tqdm \
     lmdb \
     scikit-learn \
     pyarrow==2.0.0 \
-    timm \
+    timm==0.3.4 \
     DALL-E \
     munkres \
     six \
@@ -75,6 +76,8 @@ RUN git clone -b v0.12.0 https://github.com/open-mmlab/mmsegmentation.git \
     -c ../constraints.txt \
     --upgrade-strategy only-if-needed -v -e . \
     && cd ..
+
+RUN pip3 install --no-cache-dir protobuf==3.20
 
 # Cleanup pip cache
 RUN rm -rf ~/.cache/pip

@@ -1,2 +1,3 @@
-from .vision_transformer import VisionTransformer, vit_tiny, vit_small, vit_base, vit_large
+from .vision_transformer import VisionTransformer, vit_tiny as vit_tiny_ibot, vit_small as vit_small_ibot, vit_base as vit_base_ibot, vit_large as vit_large_ibot
+from .vision_transformer_dinov1 import VisionTransformer, vit_tiny as vit_tiny_dinov1, vit_small as vit_small_dinov1, vit_base as vit_base_dinov1, vit_large as vit_large_dinov1
 from .swin_transformer import SwinTransformer, swin_tiny, swin_small, swin_base, swin_large

@@ -19,6 +19,7 @@ import torch.nn as nn
 import torch.distributed as dist
 import torch.backends.cudnn as cudnn
 import torch.nn.functional as F
+from torchvision.transforms import functional as tv_F
 
 from pathlib import Path
 from PIL import Image
@@ -34,7 +35,7 @@ def get_args_parser():
 
     # Model parameters
     parser.add_argument('--arch', default='vit_small', type=str,
-        choices=['vit_tiny', 'vit_small', 'vit_base', 'vit_large', 'deit_tiny', 'deit_small',
+        choices=['vit_tiny_ibot', 'vit_small_ibot', 'vit_base_ibot', 'vit_large_ibot', 'deit_tiny_ibot', 'deit_small_ibot',
                  'swin_tiny','swin_small', 'swin_base', 'swin_large'],
         help="""Name of architecture to train. For quick experiments with ViTs,
         we recommend using vit_tiny or vit_small.""")
@@ -125,6 +126,8 @@ def get_args_parser():
     parser.add_argument('--drop_path', type=float, default=0.1, help="""Drop path rate for student network.""")
 
     # Multi-crop parameters
+    parser.add_argument("--pre_crops_scale", type=float, nargs='+', default=(0.05, 0.2),
+        help="""Scale range of the first video crop to reduce clutter in scenes.""")
     parser.add_argument('--global_crops_number', type=int, default=2, help="""Number of global
         views to generate. Default is to use two global crops. """)
     parser.add_argument('--global_crops_scale', type=float, nargs='+', default=(0.14, 1.),
@@ -159,6 +162,7 @@ def train_ibot(args):
 
     # ============ preparing data ... ============
     transform = DataAugmentationiBOT(
+        args.pre_crops_scale,
         args.global_crops_scale,
         args.local_crops_scale,
         args.global_crops_number,
@@ -571,8 +575,38 @@ class iBOTLoss(nn.Module):
         patch_center = patch_center / (len(teacher_patch) * dist.get_world_size())
         self.center2 = self.center2 * self.center_momentum2 + patch_center * (1 - self.center_momentum2)
 
+
+
+class RandomlyShapedCropVideo(transforms.RandomResizedCrop):
+    def __init__(
+        self,
+        scale=(0.08, 1.0),
+        ratio=(3.0 / 4.0, 4.0 / 3.0)
+    ):
+        self.scale = scale
+        self.ratio = ratio
+
+    def __call__(self, clip):
+        """
+        Args:
+            clip (list): Video clip to be cropped. List of (C, H, W) images
+        Returns:
+            torch.tensor: randomly cropped/resized video clip.
+                list of (C, H, W) images
+        """
+        i, j, h, w = self.get_params(clip[0], self.scale, self.ratio)
+        return [tv_F.crop(c, i, j, h, w) for c in clip]
+
+    def __repr__(self):
+        return (
+            self.__class__.__name__
+            + "(size={0}, interpolation_mode={1}, scale={2}, ratio={3})".format(
+                self.size, self.interpolation_mode, self.scale, self.ratio
+            )
+        )
+
 class DataAugmentationiBOT(object):
-    def __init__(self, global_crops_scale, local_crops_scale, global_crops_number, local_crops_number):
+    def __init__(self, pre_crops_scale, global_crops_scale, local_crops_scale, global_crops_number, local_crops_number):
         flip_and_color_jitter = transforms.Compose([
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.RandomApply(
@@ -585,6 +619,9 @@ class DataAugmentationiBOT(object):
             transforms.ToTensor(),
             transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
         ])
+
+        # Pre-crop that is used as a basis for both global and local crops
+        self.video_pre_crop = RandomlyShapedCropVideo(scale=pre_crops_scale)
 
         self.global_crops_number = global_crops_number
         # transformation for the first global crop
@@ -612,6 +649,7 @@ class DataAugmentationiBOT(object):
         ])
 
     def __call__(self, image):
+        image = self.video_pre_crop([image])[0]
         crops = []
         crops.append(self.global_transfo1(image))
         for _ in range(self.global_crops_number - 1):
